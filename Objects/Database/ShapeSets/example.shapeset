@@ -1,0 +1,21 @@
+{
+   "partList" : [
+      {
+         "box" : {
+            "x" : 1,
+            "y" : 1,
+            "z" : 4
+         },
+         "physicsMaterial" : "Mechanical",
+         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_mountablespudgun.rend",
+         "rotationSet" : "PropYZ",
+         "scripted" : {
+            "classname" : "Laser",
+            "filename" : "$CONTENT_DATA/Scripts/Laser.lua"
+         },
+         "showInInventory" : true,
+         "sticky" : "-Z-Y+Y-X+X",
+         "uuid" : "20e4b6bd-434a-41bf-9bb1-07ac1e08ccfb"
+      }
+   ]
+}
