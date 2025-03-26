@@ -24,6 +24,10 @@ function Laser.server_init(self)
 	self.hasAlreadyFired = false
 end
 
+function Laser.fireOrigin(self)
+	return self.shape.worldPosition + self.shape.up * 0.25
+end
+
 function Laser.canFire(self)
 	return self.cooldown == 0 and not self.hasAlreadyFired
 end
@@ -39,11 +43,15 @@ local function rollShapeDestruction(shape)
 end
 
 function Laser.server_fire(self)
-	local startPosition = self.shape.worldPosition
+	local startPosition = self:fireOrigin()
 	local endPosition = startPosition + self.shape:getUp() * self.maxRange
 
 
 	local hit, raycastResult = sm.physics.raycast(startPosition, endPosition)
+
+	local distance = raycastResult.directionWorld:length() * raycastResult.fraction
+
+	self.network:sendToClients("client_onShoot", distance)
 
 	if hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
@@ -57,6 +65,16 @@ function Laser.server_fire(self)
 			end
 		end
 	end
+end
+
+---@param distance number
+function Laser.client_onShoot(self, distance)
+	print("distance: ", distance)
+
+	sm.effect.playEffect("Laser - Shoot", self:fireOrigin() + self.shape.up * (distance / 2), nil, self.shape.localRotation * sm.quat.fromEuler(sm.vec3.new(90,0,0)), nil, {
+		Scale = sm.vec3.new(0.25, .25, distance * 4),
+		Color = self.shape.color
+	})
 end
 
 function Laser.server_onFixedUpdate(self)

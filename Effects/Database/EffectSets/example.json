@@ -1,19 +1,15 @@
 {
-	/*"Example":
-	{
-		"effectList":
-		[
-			{
-				"type": "audio",
-				"name": "PotatoRifle - Shoot",
-				"delay": 0.0
-			},
-			{
-				"type": "particle",
-				"name": "p_spudgun_basic_muzzel",
-				"attached": false,
-				"delay": 0.05
-			}
-		]
-	}*/
+   "Laser - Shoot" : {
+      "effectList" : [
+         {
+            "audio" : [ "PotatoRifle - Shoot" ],
+            "type" : "audio"
+         },
+         {
+            "offset" : [ 0.0, 0.0, 0.0 ],
+            "particles" : [ "laser" ],
+            "type" : "particle"
+         }
+      ]
+   }
 }
