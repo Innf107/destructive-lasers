@@ -71,7 +71,10 @@ end
 function Laser.client_onShoot(self, distance)
 	print("distance: ", distance)
 
-	sm.effect.playEffect("Laser - Shoot", self:fireOrigin() + self.shape.up * (distance / 2), nil, self.shape.localRotation * sm.quat.fromEuler(sm.vec3.new(90,0,0)), nil, {
+	local position = self:fireOrigin() + self.shape.up * (distance / 2)
+	-- stupid quaternions
+	local rotation = self.shape.localRotation * sm.quat.fromEuler(sm.vec3.new(90,0,0))
+	sm.effect.playEffect("Laser - Shoot", position, nil, rotation, nil, {
 		Scale = sm.vec3.new(0.25, .25, distance * 4),
 		Color = self.shape.color
 	})
