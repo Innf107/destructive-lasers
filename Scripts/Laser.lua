@@ -12,8 +12,15 @@ Laser.cooldown = 0
 Laser.hasAlreadyFired = false
 
 ---@param uuid Uuid
+---@return boolean
 function isMirror(uuid)
 	return true
+end
+
+---@param shape Shape
+---@return boolean
+function isGlass(shape)
+	return shape.material == "Glass"
 end
 
 function Laser.server_onCreate(self)
@@ -72,27 +79,43 @@ end
 
 ---@param startPosition Vec3
 ---@param direction Vec3
+---@param color Color
 ---@param maxReflections integer
-function Laser.server_fireLaserFrom(self, startPosition, direction, maxReflections)
+function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxReflections)
 	local endPosition = startPosition + direction * self.maxRange
 
 	local hit, raycastResult = sm.physics.raycast(startPosition, endPosition)
 
 	local distance = raycastResult.directionWorld:length() * raycastResult.fraction
 
-	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, distance })
+	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, color, distance })
 
 	if hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 
-		if isMirror(hitShape.uuid) then
+		if isGlass(hitShape) then
+			local newColor
+
+			if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
+				newColor = color
+			else
+				newColor = hitShape.color
+			end
+			self:server_fireLaserFrom(raycastResult.pointWorld, direction, newColor, maxReflections)
+		elseif isMirror(hitShape.uuid) then
 			if maxReflections > 0 then
 				local normal = raycastResult.normalWorld
 				local rotation = sm.vec3.getRotation(direction, normal)
 				local newDirection = rotation * rotation * -direction
 
-				print(direction, "-->", newDirection)
-				self:server_fireLaserFrom(raycastResult.pointWorld, newDirection, maxReflections - 1)
+				local newColor
+				if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
+					newColor = color
+				else
+					newColor = hitShape.color
+				end
+	
+				self:server_fireLaserFrom(raycastResult.pointWorld, newDirection, newColor, maxReflections - 1)
 			end
 		else
 			self:server_hitShape(hitShape, raycastResult.pointWorld)
@@ -103,25 +126,23 @@ end
 function Laser.server_fire(self)
 	local startPosition = self:fireOrigin()
 
-	self:server_fireLaserFrom(startPosition, self.shape:getUp(), 20)
+	self:server_fireLaserFrom(startPosition, self.shape:getUp(), self.shape.color, 20)
 end
 
 function Laser.client_fireLaserFromEvent(self, data)
-	return self:client_fireLaserFrom(data[1], data[2], data[3])
+	return self:client_fireLaserFrom(data[1], data[2], data[3], data[4])
 end
 
 ---@param startPosition Vec3
 ---@param direction Vec3
 ---@param distance number
-function Laser.client_fireLaserFrom(self, startPosition, direction, distance)
-	print(startPosition, direction, distance)
-
+function Laser.client_fireLaserFrom(self, startPosition, direction, color, distance)
 	local position = startPosition + direction * (distance / 2)
 	-- stupid quaternions
-	local rotation = sm.vec3.getRotation(sm.vec3.new(0,1,0), direction)
+	local rotation = sm.vec3.getRotation(sm.vec3.new(0, 1, 0), direction)
 	sm.effect.playEffect("Laser - Shoot", position, nil, rotation, nil, {
 		Scale = sm.vec3.new(0.25, .25, distance * 4),
-		Color = self.shape.color
+		Color = color
 	})
 end
 
