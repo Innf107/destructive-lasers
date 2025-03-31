@@ -1,4 +1,16 @@
 {
+   "blockList" : [
+      {
+         "asg" : "$CONTENT_DATA/Textures/mirror_asg.tga",
+         "color" : "675f51",
+         "dif" : "$GAME_DATA/Textures/Tiled/Metal/t_tiled_metal_dif.tga",
+         "nor" : "$GAME_DATA/Textures/Tiled/Metal/t_tiled_metal_nor.tga",
+         "physicsMaterial" : "Metal",
+         "showInInventory" : true,
+         "tiling" : 8,
+         "uuid" : "a66c65ac-3a82-4fdd-aeed-d33830d07ad7"
+      }
+   ],
    "partList" : [
       {
          "box" : {
@@ -17,6 +29,16 @@
          "showInInventory" : true,
          "sticky" : "-Z-Y+Y-X+X",
          "uuid" : "20e4b6bd-434a-41bf-9bb1-07ac1e08ccfb"
+      }
+   ],
+   "wedgeList" : [
+      {
+         "blockUuid" : "a66c65ac-3a82-4fdd-aeed-d33830d07ad7",
+         "material" : "DifAsgNor",
+         "physicsMaterial" : "Metal",
+         "showInInventory" : true,
+         "textureList" : [ "", "", "" ],
+         "uuid" : "371c9740-9aec-4199-8105-2cea17a9ec23"
       }
    ]
 }

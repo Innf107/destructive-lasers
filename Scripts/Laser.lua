@@ -11,10 +11,13 @@ Laser.maxRange = 100
 Laser.cooldown = 0
 Laser.hasAlreadyFired = false
 
+local mirrorBlockUuid = sm.uuid.new("a66c65ac-3a82-4fdd-aeed-d33830d07ad7")
+local mirrorWedgeUuid = sm.uuid.new("371c9740-9aec-4199-8105-2cea17a9ec23")
+
 ---@param uuid Uuid
 ---@return boolean
 function isMirror(uuid)
-	return true
+	return uuid == mirrorBlockUuid or uuid == mirrorWedgeUuid
 end
 
 ---@param shape Shape
@@ -93,7 +96,25 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 	if hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 
-		if isGlass(hitShape) then
+		if isMirror(hitShape.uuid) then
+			if maxReflections > 0 then
+				local normal = raycastResult.normalWorld
+				local rotation = sm.vec3.getRotation(direction, normal)
+				local newDirection = rotation * rotation * -direction
+
+				print(normal:normalize())
+
+				local newColor
+				if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
+					newColor = color
+				else
+					newColor = hitShape.color
+				end
+
+
+				self:server_fireLaserFrom(raycastResult.pointWorld, newDirection, newColor, maxReflections - 1)
+			end
+		elseif isGlass(hitShape) then
 			local newColor
 
 			if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
@@ -102,21 +123,6 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 				newColor = hitShape.color
 			end
 			self:server_fireLaserFrom(raycastResult.pointWorld, direction, newColor, maxReflections)
-		elseif isMirror(hitShape.uuid) then
-			if maxReflections > 0 then
-				local normal = raycastResult.normalWorld
-				local rotation = sm.vec3.getRotation(direction, normal)
-				local newDirection = rotation * rotation * -direction
-
-				local newColor
-				if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
-					newColor = color
-				else
-					newColor = hitShape.color
-				end
-	
-				self:server_fireLaserFrom(raycastResult.pointWorld, newDirection, newColor, maxReflections - 1)
-			end
 		else
 			self:server_hitShape(hitShape, raycastResult.pointWorld)
 		end
