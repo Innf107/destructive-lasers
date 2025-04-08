@@ -88,7 +88,7 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 	local endPosition = startPosition + direction * self.maxRange
 
 	local hit, raycastResult = sm.physics.raycast(startPosition, endPosition)
-
+	
 	local distance = raycastResult.directionWorld:length() * raycastResult.fraction
 
 	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, color, distance })
@@ -98,11 +98,9 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 
 		if isMirror(hitShape.uuid) then
 			if maxReflections > 0 then
+				-- TODO: you might be able to calculate the normal yourself here since you know exactly which blocks could have been hit and their rotation
 				local normal = raycastResult.normalWorld
-				local rotation = sm.vec3.getRotation(direction, normal)
-				local newDirection = rotation * rotation * -direction
-
-				print(normal:normalize())
+				local newDirection = direction - normal * (direction:dot(normal) * 2)
 
 				local newColor
 				if hitShape.color == sm.item.getShapeDefaultColor(hitShape.uuid) then
