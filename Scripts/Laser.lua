@@ -80,15 +80,58 @@ function Laser.server_hitShape(self, hitShape, hitPosition)
 	end
 end
 
+local blockNormals = {
+	sm.vec3.new(1, 0, 0),
+	sm.vec3.new(0, 1, 0),
+	sm.vec3.new(0, 0, 1),
+	sm.vec3.new(-1, 0, 0),
+	sm.vec3.new(0, -1, 0),
+	sm.vec3.new(0, 0, -1),
+}
+
+---@param hitShape Shape
+---@param inexactNormal Vec3
+---@return Vec3
+function exactNormal(hitShape, inexactNormal)
+	local candidates
+	if hitShape.uuid == mirrorBlockUuid then
+		candidates = blockNormals
+	elseif hitShape.uuid == mirrorWedgeUuid then
+		local boundingBox = hitShape:getBoundingBox()
+		candidates = {
+			sm.vec3.new(0, boundingBox.z, boundingBox.y):normalize(),
+			sm.vec3.new(1, 0, 0),
+			sm.vec3.new(-1, 0, 0),
+			sm.vec3.new(0, -1, 0),
+			sm.vec3.new(0, 0, -1),
+		}
+	else
+		return inexactNormal
+	end
+
+	local best = nil
+	local bestDistance = 999999
+	for _, candidate in ipairs(candidates) do
+		local rotatedCandidate = hitShape.worldRotation * candidate
+		local distance = (rotatedCandidate - inexactNormal):length2()
+		if distance < bestDistance then
+			best = rotatedCandidate
+			bestDistance = distance
+		end
+	end
+	return best
+end
+
 ---@param startPosition Vec3
 ---@param direction Vec3
 ---@param color Color
 ---@param maxReflections integer
 function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxReflections)
+	
 	local endPosition = startPosition + direction * self.maxRange
 
 	local hit, raycastResult = sm.physics.raycast(startPosition, endPosition)
-	
+
 	local distance = raycastResult.directionWorld:length() * raycastResult.fraction
 
 	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, color, distance })
@@ -98,8 +141,8 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 
 		if isMirror(hitShape.uuid) then
 			if maxReflections > 0 then
-				-- TODO: you might be able to calculate the normal yourself here since you know exactly which blocks could have been hit and their rotation
-				local normal = raycastResult.normalWorld
+				local normal = exactNormal(hitShape, raycastResult.normalWorld)
+
 				local newDirection = direction - normal * (direction:dot(normal) * 2)
 
 				local newColor
@@ -130,10 +173,13 @@ end
 function Laser.server_fire(self)
 	local startPosition = self:fireOrigin()
 
-	self:server_fireLaserFrom(startPosition, self.shape:getUp(), self.shape.color, 20)
+	self:server_fireLaserFrom(startPosition, self.shape:getUp(), self.shape.color, 50)
 end
 
 function Laser.client_fireLaserFromEvent(self, data)
+	if not self then
+		return
+	end
 	return self:client_fireLaserFrom(data[1], data[2], data[3], data[4])
 end
 
