@@ -1,3 +1,13 @@
 {
-   "lodList" : [ {} ]
+   "lodList" : [
+      {
+         "mesh" : "$CONTENT_DATA/Models/laser.obj",
+         "subMeshList" : [
+            {
+               "material" : "DifAsgNor",
+               "textureList" : [ "", "", "" ]
+            }
+         ]
+      }
+   ]
 }

@@ -94,9 +94,9 @@ local blockNormals = {
 ---@return Vec3
 function exactNormal(hitShape, inexactNormal)
 	local candidates
-	if hitShape.uuid == mirrorBlockUuid then
+	if hitShape.isBlock then
 		candidates = blockNormals
-	elseif hitShape.uuid == mirrorWedgeUuid then
+	elseif hitShape.isWedge then
 		local boundingBox = hitShape:getBoundingBox()
 		candidates = {
 			sm.vec3.new(0, boundingBox.z, boundingBox.y):normalize(),
@@ -177,9 +177,6 @@ function Laser.server_fire(self)
 end
 
 function Laser.client_fireLaserFromEvent(self, data)
-	if not self then
-		return
-	end
 	return self:client_fireLaserFrom(data[1], data[2], data[3], data[4])
 end
 
@@ -190,7 +187,8 @@ function Laser.client_fireLaserFrom(self, startPosition, direction, color, dista
 	local position = startPosition + direction * (distance / 2)
 	-- stupid quaternions
 	local rotation = sm.vec3.getRotation(sm.vec3.new(0, 1, 0), direction)
-	sm.effect.playEffect("Laser - Shoot", position, nil, rotation, nil, {
+
+	sm.effect.playEffect("Laser - Beam", position, nil, rotation, nil, {
 		Scale = sm.vec3.new(0.25, .25, distance * 4),
 		Color = color
 	})

@@ -1,10 +1,14 @@
 {
-   "Laser - Shoot" : {
+   "Laser - Audio" : {
       "effectList" : [
          {
-            "audio" : [ "PotatoRifle - Shoot" ],
+            "audio" : [ "Phaser" ],
             "type" : "audio"
-         },
+         }
+      ]
+   },
+   "Laser - Beam" : {
+      "effectList" : [
          {
             "offset" : [ 0.0, 0.0, 0.0 ],
             "particles" : [ "laser" ],

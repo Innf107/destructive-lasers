@@ -20,7 +20,7 @@
          },
          "color" : "FF0000",
          "physicsMaterial" : "Mechanical",
-         "renderable" : "$GAME_DATA/Objects/Renderable/Interactive/obj_interactive_mountablespudgun.rend",
+         "renderable" : "$CONTENT_DATA/Objects/Renderables/Laser.rend",
          "rotationSet" : "PropYZ",
          "scripted" : {
             "classname" : "Laser",
