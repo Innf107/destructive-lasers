@@ -6,13 +6,19 @@ Laser.connectionInput = sm.interactable.connectionType.logic
 Laser.connectionOutput = sm.interactable.connectionType.none
 
 Laser.fireDelay = 8
-Laser.maxRange = 100
+Laser.maxRange = 1000
 
 Laser.cooldown = 0
 Laser.hasAlreadyFired = false
 
 local mirrorBlockUuid = sm.uuid.new("a66c65ac-3a82-4fdd-aeed-d33830d07ad7")
 local mirrorWedgeUuid = sm.uuid.new("371c9740-9aec-4199-8105-2cea17a9ec23")
+
+-- Everything with a durability level at or above this will be indestructible.
+-- This is currently set to the durability of tier 3 metal.
+-- For all durability levels below this, the destruction probability scales linearly with
+-- the durability level
+local maxDurability = 8
 
 ---@param uuid Uuid
 ---@return boolean
@@ -50,11 +56,14 @@ end
 ---@param shape Shape
 ---@return boolean
 local function rollShapeDestruction(shape)
+	local durability = sm.item.getQualityLevel(shape.uuid)
+
+	local survivalProbability = durability / maxDurability
+
 	if not shape.destructable then
 		return false
 	end
-
-	return math.random() > 0.5
+	return math.random() >= survivalProbability
 end
 
 
