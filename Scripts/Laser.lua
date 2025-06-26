@@ -158,8 +158,8 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 		-- TODO: figure out something more sensible (why do i need this anyway??)
 		local source = sm.player.getAllPlayers()[1]
 
-		-- TODO: maybe use a custom melee attack instead
-		sm.melee.meleeAttack(sm.uuid.new("e7fa1286-152e-463b-a126-100478f50aa8"), 20, raycastResult.pointWorld, direction, source, 0, 1)
+		print("whyyyyyyyy")
+		sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, raycastResult.pointWorld, direction, source, 0, 1)
 	elseif hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 

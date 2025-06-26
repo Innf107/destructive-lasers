@@ -1,0 +1,21 @@
+{
+   "meleeAttacks" : [
+      {
+         "destruction" : {
+            "destructionLevels" : [
+               {
+                  "chance" : 1.0,
+                  "qualityLevel" : 1
+               }
+            ]
+         },
+         "hitSphere" : {
+            "radius" : 0.010
+         },
+         "impactEffect" : "Weapon - Impact",
+         "name" : "Laser Hit",
+         "useWideFallback" : true,
+         "uuid" : "d5a446b7-bdf8-4fdc-9269-5353242dd76c"
+      }
+   ]
+}
