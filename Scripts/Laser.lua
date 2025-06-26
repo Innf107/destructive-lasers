@@ -136,7 +136,6 @@ end
 ---@param color Color
 ---@param maxReflections integer
 function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxReflections)
-	
 	local endPosition = startPosition + direction * self.maxRange
 
 	local hit, raycastResult = sm.physics.raycast(startPosition, endPosition)
@@ -145,7 +144,23 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 
 	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, color, distance })
 
-	if hit and raycastResult.type == "body" then
+	if hit and raycastResult.type == "harvestable" then
+		local harvestable = raycastResult:getHarvestable()
+		-- TODO: do the same as would happen if it were hit by a projectile (or maybe an explosion?)
+		-- destroy just removes it immediately
+	elseif hit and raycastResult.type == "joint" then
+		-- We ignore joints since they will be destroyed anyway if we shoot the shape they're attached to
+		-- and this is more consistent with how the rest of the game/physics treats them.
+		self:server_fireLaserFrom(raycastResult.pointWorld, direction, color, maxReflections)
+	elseif hit and raycastResult.type == "character" then
+		local character = raycastResult:getCharacter()
+
+		-- TODO: figure out something more sensible (why do i need this anyway??)
+		local source = sm.player.getAllPlayers()[1]
+
+		-- TODO: maybe use a custom melee attack instead
+		sm.melee.meleeAttack(sm.uuid.new("e7fa1286-152e-463b-a126-100478f50aa8"), 20, raycastResult.pointWorld, direction, source, 0, 1)
+	elseif hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 
 		if isMirror(hitShape.uuid) then
