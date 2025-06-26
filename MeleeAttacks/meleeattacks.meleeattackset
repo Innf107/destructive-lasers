@@ -6,6 +6,30 @@
                {
                   "chance" : 1.0,
                   "qualityLevel" : 1
+               },
+               {
+                  "chance" : 0.750,
+                  "qualityLevel" : 2
+               },
+               {
+                  "chance" : 0.6250,
+                  "qualityLevel" : 3
+               },
+               {
+                  "chance" : 0.50,
+                  "qualityLevel" : 4
+               },
+               {
+                  "chance" : 0.3750,
+                  "qualityLevel" : 5
+               },
+               {
+                  "chance" : 0.250,
+                  "qualityLevel" : 6
+               },
+               {
+                  "chance" : 0.1250,
+                  "qualityLevel" : 7
                }
             ]
          },
@@ -14,7 +38,7 @@
          },
          "impactEffect" : "Weapon - Impact",
          "name" : "Laser Hit",
-         "useWideFallback" : true,
+         "useWideFallback" : false,
          "uuid" : "d5a446b7-bdf8-4fdc-9269-5353242dd76c"
       }
    ]

@@ -14,12 +14,6 @@ Laser.hasAlreadyFired = false
 local mirrorBlockUuid = sm.uuid.new("a66c65ac-3a82-4fdd-aeed-d33830d07ad7")
 local mirrorWedgeUuid = sm.uuid.new("371c9740-9aec-4199-8105-2cea17a9ec23")
 
--- Everything with a durability level at or above this will be indestructible.
--- This is currently set to the durability of tier 3 metal.
--- For all durability levels below this, the destruction probability scales linearly with
--- the durability level
-local maxDurability = 8
-
 ---@param uuid Uuid
 ---@return boolean
 function isMirror(uuid)
@@ -53,40 +47,19 @@ function Laser.canFire(self)
 	return self.cooldown == 0 and not self.hasAlreadyFired
 end
 
----@param shape Shape
----@return boolean
-local function rollShapeDestruction(shape)
-	local durability = sm.item.getQualityLevel(shape.uuid)
+---@param position Vec3
+---@param direction Vec3
+function Laser.attackAt(self, position, direction)
+	-- TODO: figure out something more sensible (why do i need this anyway??)
+	local source = sm.player.getAllPlayers()[1]
 
-	local survivalProbability = durability / maxDurability
-
-	if not shape.destructable then
-		return false
-	end
-	return math.random() >= survivalProbability
+	sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, position, direction, source)
 end
-
 
 ---@param uuid Uuid
 function isExplosive(uuid)
 	local data = sm.item.getFeatureData(uuid)
 	return data and data.classname == "Explosive"
-end
-
----@param hitShape Shape
----@param hitPosition Vec3
-function Laser.server_hitShape(self, hitShape, hitPosition)
-	if (isExplosive(hitShape.uuid)) then
-		-- TODO
-		sm.melee.meleeAttack(nil, 10, hitPosition, sm.vec3.zero(), nil)
-	elseif rollShapeDestruction(hitShape) then
-		-- TODO: does this handle wedges correctly?
-		if hitShape.isBlock then
-			hitShape:destroyBlock(hitShape:getClosestBlockLocalPosition(hitPosition))
-		else
-			hitShape:destroyShape(0)
-		end
-	end
 end
 
 local blockNormals = {
@@ -144,22 +117,10 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 
 	self.network:sendToClients("client_fireLaserFromEvent", { startPosition, direction, color, distance })
 
-	if hit and raycastResult.type == "harvestable" then
-		local harvestable = raycastResult:getHarvestable()
-		-- TODO: do the same as would happen if it were hit by a projectile (or maybe an explosion?)
-		-- destroy just removes it immediately
-	elseif hit and raycastResult.type == "joint" then
+	if hit and raycastResult.type == "joint" then
 		-- We ignore joints since they will be destroyed anyway if we shoot the shape they're attached to
 		-- and this is more consistent with how the rest of the game/physics treats them.
 		self:server_fireLaserFrom(raycastResult.pointWorld, direction, color, maxReflections)
-	elseif hit and raycastResult.type == "character" then
-		local character = raycastResult:getCharacter()
-
-		-- TODO: figure out something more sensible (why do i need this anyway??)
-		local source = sm.player.getAllPlayers()[1]
-
-		print("whyyyyyyyy")
-		sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, raycastResult.pointWorld, direction, source, 0, 1)
 	elseif hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 
@@ -176,7 +137,6 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 					newColor = hitShape.color
 				end
 
-
 				self:server_fireLaserFrom(raycastResult.pointWorld, newDirection, newColor, maxReflections - 1)
 			end
 		elseif isGlass(hitShape) then
@@ -189,8 +149,10 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 			end
 			self:server_fireLaserFrom(raycastResult.pointWorld, direction, newColor, maxReflections)
 		else
-			self:server_hitShape(hitShape, raycastResult.pointWorld)
+			self:attackAt(raycastResult.pointWorld, direction)
 		end
+	elseif hit then
+		self:attackAt(raycastResult.pointWorld, direction)
 	end
 end
 
