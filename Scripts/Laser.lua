@@ -49,11 +49,20 @@ end
 
 ---@param position Vec3
 ---@param direction Vec3
-function Laser.attackAt(self, position, direction)
+function Laser.attackBlockAt(self, position, direction)
 	-- TODO: figure out something more sensible (why do i need this anyway??)
 	local source = sm.player.getAllPlayers()[1]
 
 	sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, position, direction, source)
+end
+
+---@param position Vec3
+---@param direction Vec3
+function Laser.attackCharacterAt(self, position, direction)
+	-- TODO: figure out something more sensible (why do i need this anyway??)
+	local source = sm.player.getAllPlayers()[1]
+
+	sm.melee.meleeAttack(sm.uuid.new("7cf267af-a696-429c-97c4-99a64af6b1e0"), 20, position, direction, source)
 end
 
 ---@param uuid Uuid
@@ -121,6 +130,10 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 		-- We ignore joints since they will be destroyed anyway if we shoot the shape they're attached to
 		-- and this is more consistent with how the rest of the game/physics treats them.
 		self:server_fireLaserFrom(raycastResult.pointWorld, direction, color, maxReflections)
+	elseif hit and raycastResult.type == "harvestable" then
+		self:attackBlockAt(raycastResult.pointWorld, direction)
+	elseif hit and raycastResult.type == "character" then
+		self:attackCharacterAt(raycastResult.pointWorld, direction)
 	elseif hit and raycastResult.type == "body" then
 		local hitShape = raycastResult:getShape()
 
@@ -149,10 +162,8 @@ function Laser.server_fireLaserFrom(self, startPosition, direction, color, maxRe
 			end
 			self:server_fireLaserFrom(raycastResult.pointWorld, direction, newColor, maxReflections)
 		else
-			self:attackAt(raycastResult.pointWorld, direction)
+			self:attackBlockAt(raycastResult.pointWorld, direction)
 		end
-	elseif hit then
-		self:attackAt(raycastResult.pointWorld, direction)
 	end
 end
 
