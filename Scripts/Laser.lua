@@ -53,7 +53,7 @@ function Laser.attackBlockAt(self, position, direction)
 	-- TODO: figure out something more sensible (why do i need this anyway??)
 	local source = sm.player.getAllPlayers()[1]
 
-	sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, position, direction, source)
+	sm.melee.meleeAttack(sm.uuid.new("d5a446b7-bdf8-4fdc-9269-5353242dd76c"), 20, position, direction, source, 0, 0)
 end
 
 ---@param position Vec3
@@ -62,7 +62,7 @@ function Laser.attackCharacterAt(self, position, direction)
 	-- TODO: figure out something more sensible (why do i need this anyway??)
 	local source = sm.player.getAllPlayers()[1]
 
-	sm.melee.meleeAttack(sm.uuid.new("7cf267af-a696-429c-97c4-99a64af6b1e0"), 20, position, direction, source)
+	sm.melee.meleeAttack(sm.uuid.new("7cf267af-a696-429c-97c4-99a64af6b1e0"), 20, position, direction, source, 0, 0)
 end
 
 ---@param uuid Uuid
